@@ -1,0 +1,11 @@
+development:
+  api_key: mykeyzxc0v980zx9cv8
+  secret: mysecretzxczxcv098zx
+
+test:
+  api_key: mykeyzcxvzxcvzxc9v8
+  secret:  mysecretxvxc09vz09
+
+production:
+  api_key: mykey123102983
+  secret: mysecret12301293012

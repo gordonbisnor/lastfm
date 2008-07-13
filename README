@@ -1,0 +1,32 @@
+LastFm
+============
+
+Provides an easy way to query LastFM. 
+
+This isn't a comprehensive plugin,
+it just includes the queries that I required for my site.  
+
+Make sure to put your api key in config/last_fm.yml
+
+Example
+=======
+
+albums_controller.rb --
+
+	class AlbumsController < ApplicationController
+	 last_fm
+
+		def show
+			@album = Album.find(1)
+			@current_events = last_fm_artists_current_events(@album.band.name)
+			end
+	end
+
+albums/show.html.erb --
+
+<% @current.events.each do |event %>
+	<p><%= event['bands] %></p>
+	<p><%= event['date] %></p>
+<% end %>
+
+Copyright (c) 2008 Gordon B. Isnor, released under the MIT license

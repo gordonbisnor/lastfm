@@ -1,0 +1,12 @@
+<h2>Current Events For <%= @album.band.name %></h2>
+<ul>
+	<%= @current_events.each do |event| %>
+		<li>
+			<h3>
+				<%= event['title'] %>
+			</h3>
+			<p>
+				<%= event['date'] %>
+		</li>
+<% end %>
+</ul>
