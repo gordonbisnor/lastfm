@@ -58,8 +58,8 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)	
         album = {}
-        album['releasedate'] = xml.elements['releasedate']
-        album['url'] = xml.elements['url']
+        album['releasedate'] = xml.elements['releasedate'].text
+        album['url'] = xml.elements['url'].text
         coverart = xml.elements['//coverart']
         album['cover'] = coverart.elements['//large'].text
         tracks = []
@@ -80,11 +80,17 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         artist = {}
-        artist['mbid'] = xml.elements['//mbid']
-        artist['url'] = xml.elements['//url']
-        bio = xml.elements['//bio']
-        artist['bio_summary'] = bio.elements['summary'].text
-        artist['bio_content'] = bio.elements['content'].text
+        if not xml.elements['mbid'].nil?
+          artist['mbid'] = xml.elements['mbid'].text
+        end
+        if not xml.elements['url'].nil?
+          artist['url'] = xml.elements['url'].text
+        end
+        bio = xml.elements['bio']
+        if not bio.nil?
+          artist['bio_summary'] = bio.elements['summary'].text
+          artist['bio_content'] = bio.elements['content'].text
+        end
         artist['small_image'] =  xml.elements['//artist'].elements[4].text 
         artist['medium_image'] =  xml.elements['//artist'].elements[5].text 
         artist['large_image'] =  xml.elements['//artist'].elements[6].text 
@@ -101,8 +107,10 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         events = []
+         i = 1
         # REFACTOR MY CODE METHOD
-        xml.elements.to_a('//event')[1..limit].each do |event| 
+        xml.elements.each('//event') do |event| 
+         if i <= limit
           bands = []
           artists = event.elements['artists']
           artists.elements.each('artist') do |band|
@@ -120,6 +128,8 @@ module LastFm
                 "venue_url" => venue.elements['url'].text,
                 "bands" => bands 
                   }       
+            end # if i
+            i = i + 1
           end # END EACH EVENT
         end # END IF DATA NOT FALSE
         return events 
@@ -133,7 +143,9 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         artists = []
-        xml.elements.to_a('//artist')[1..limit].each do |artist|
+        i = 1
+        xml.elements.each('//artist') do |artist|
+          if i <= limit
             artists << {
                   "name" => artist.elements['name'].text,
                   "url" => artist.elements['url'].text,
@@ -142,6 +154,8 @@ module LastFm
                   "mbid" => artist.elements['mbid'].text,
                   "match" => artist.elements['match'].text
                   }              
+          end
+          i = i + 1
         end
         return artists
       end
@@ -154,12 +168,16 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         albums = []
-        xml.elements.to_a('//album')[1..limit].each do |album| 
+        i = 1
+        xml.elements.each('//album') do |album| 
+          if i <= limit
             albums <<  { 
                   "name"=>album.elements['name'].text, 
                   "url" => album.elements['url'].text, 
                   "small_image" => album.elements['image'].text 
                   }
+          end # if i
+          i = i + 1
         end
       end
       return albums
@@ -174,11 +192,15 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         tracks = []
-        xml.elements.to_a('//track')[1..5].each do |track| 
+        i = 1
+        xml.elements.each('//track') do |track| 
+          if i <= limit
             tracks << {
                   "name"=>track.elements['name'].text,
                   "url"=>track.elements['url'].text
                   }
+          end # if i
+          i = i + 1
         end
       end
       return tracks
@@ -191,8 +213,12 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         tags = []
-        xml.elements.to_a('//tag')[1..limit].each do |tag|
+        i = 1
+        xml.elements.each('//tag') do |tag|
+          if i <= limit
             tags << { 'tag' => tag.elements['name'].text, 'url' => tag.elements['url'].text }              
+          end # if i
+          i = i + 1
         end
         return tags    
       end
@@ -206,14 +232,18 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         bands = []
-        xml.elements.to_a('//artist')[1..10].each do |artist| 
-          bands << { 
+        i = 1
+        xml.elements.each('//artist') do |artist| 
+          if i <= limit
+            bands << { 
                   "name" => band.elements['name'].text, 
                   "url" => band.elements['url'].text,
                   "mbid" => band.elements['mbid'].text,
                   "playcount" => band.elements['playcount'].text,
                   "rank" => band.attributes['rank']
                   }
+          end # if i
+          i + i + 1
         end
         return bands
       end
@@ -229,7 +259,9 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         albums = []
-        xml.elements.to_a('//album')[1..10].each do |album| 
+        i = 1
+        xml.elements.each('//album') do |album| 
+          if i <= limit
             albums << { 
                   "name" => album.elements['name'].text,
                   "band" => album.elements['artist'].text,
@@ -239,6 +271,8 @@ module LastFm
                   "artist_mbid" => album.elements['artist'].attributes['mbid'],
                   "rank" => album.attributes['rank']
                     }
+          end # if i
+          i = i + 1
         end
         return albums
       end
