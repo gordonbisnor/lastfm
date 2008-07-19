@@ -58,15 +58,15 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)	
         album = {}
-        album['releasedate'] = xml.elements['releasedate'].text
-        album['url'] = xml.elements['url'].text
+        album['releasedate'] = xml.elements['releasedate'] ?xml.elements['releasedate'].text : ''
+        album['url'] = xml.elements['url'] ? xml.elements['url'].text : ''
         coverart = xml.elements['//coverart']
-        album['cover'] = coverart.elements['//large'].text
+        album['cover'] = coverart.elements['//large'] ? coverart.elements['//large'].text : ''
         tracks = []
         xml.elements.each('//track') do |el|
           tracks << { 
                   "title" => el.attributes["title"],
-                  "url" =>   el.elements['url'].text 
+                  "url" =>   el.elements['url'] ? el.elements['url'].text : ''
                   }
         end # END EACH TRACK
         album['tracks'] = tracks
@@ -80,16 +80,12 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         artist = {}
-        if not xml.elements['mbid'].nil?
-          artist['mbid'] = xml.elements['mbid'].text
-        end
-        if not xml.elements['url'].nil?
-          artist['url'] = xml.elements['url'].text
-        end
-        bio = xml.elements['bio']
-        if not bio.nil?
-          artist['bio_summary'] = bio.elements['summary'].text
-          artist['bio_content'] = bio.elements['content'].text
+          artist['mbid'] = xml.elements['mbid'] ?  xml.elements['mbid'].text : ''
+          artist['url'] = xml.elements['url'] ? xml.elements['url'].text : ''
+        if not xml.elements['bio'].nil?
+          bio = xml.elements['bio']
+            artist['bio_summary'] = bio.elements['summary'] ? bio.elements['summary'].text : ''
+            artist['bio_content'] = bio.elements['content'] ? bio.elements['content'].text : ''
         end
         artist['small_image'] =  xml.elements['//artist'].elements[4].text 
         artist['medium_image'] =  xml.elements['//artist'].elements[5].text 
@@ -147,12 +143,12 @@ module LastFm
         xml.elements.each('//artist') do |artist|
           if i <= limit
             artists << {
-                  "name" => artist.elements['name'].text,
-                  "url" => artist.elements['url'].text,
-                  "image" => artist.elements['image'].text,
-                  "small_image" => artist.elements['image_small'].text,
-                  "mbid" => artist.elements['mbid'].text,
-                  "match" => artist.elements['match'].text
+                  "name" => artist.elements['name'] ? artist.elements['name'].text : '',
+                  "url" => artist.elements['url'] ? artist.elements['url'].text :  '' ,
+                  "image" => artist.elements['image'] ? artist.elements['image'].text : '',
+                  "small_image" => artist.elements['image'] ? artist.elements['image'].text : '',
+                  "mbid" => artist.elements['mbid'] ? artist.elements['mbid'].text : '',
+                  "match" => artist.elements['match'] ? artist.elements['match'].text : ''
                   }              
           end
           i = i + 1
@@ -233,7 +229,7 @@ module LastFm
         xml = REXML::Document.new(data)
         bands = []
         i = 1
-        xml.elements.each('//artist') do |artist| 
+        xml.elements.each('//artist') do |band| 
           if i <= limit
             bands << { 
                   "name" => band.elements['name'].text, 
