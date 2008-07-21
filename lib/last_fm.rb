@@ -1,5 +1,7 @@
 require 'rexml/document'
 require 'net/http'
+require "digest"
+require "uri"
 
 # ActsAsLastFm
 module LastFm
@@ -24,18 +26,34 @@ module LastFm
   end
 
   module ClassMethods
-   
+
+   # CALLED IN THE CONTROLLER TO MAKE INSTANCE METHODS AVAILABLE
     def last_fm
       include LastFm::InstanceMethods
     end    
-  end
+    
+  end # END CLASS METHODS MODULE
 
-    # HELPER METHOD FOR URLs
-    def url(string)
-      return  string.gsub(/\ +/, '%20')
-    end  
+  # THESE INSTANE METHODS ARE AVAILABLE TO YOUR CONTROLLER
+  module InstanceMethods
 
-    # PERFORM THE REST QUERY
+    # CLASS METHOD CALLED BY OTHER METHODS TO GET THE REQUIRED API SIGNATURE
+    def get_signature(method,params)
+      # EMPTY ARRAY
+      signature = []
+      # APPEND METHOD 
+      signature << 'method' + method
+      # APPEND EACH PARAM 
+      params.each_pair do |key,value|
+          signature << key.to_s + value
+      end 
+      # SORT ARRAY, THEN JOIN THEN APPEND THE SECRET FROM CONFIG
+      signature = signature.sort.join + Secret
+      # RETURN THE SIGNATURE, AN MD5 ENCRYPTION OF THE SORTED STRING
+      return Digest::MD5.hexdigest(signature)
+    end
+
+    # PERFORM THE REST QUERY == THIS IS 'DEPRECATED'
     def fetch_last_fm(path)
       http = Net::HTTP.new("ws.audioscrobbler.com",80)
       path = url(path)
@@ -47,7 +65,105 @@ module LastFm
        end	
     end
 
-  module InstanceMethods
+    # HELPER METHOD FOR URLs
+    def url(string)
+      return  string.gsub(/\ +/, '%20')
+    end
+
+    # THIS HELPER METHOD PROVIDES REDIRECT PATH TO THE LASTFM AUTH PAGE
+    def authenticate_lastfm
+      # redirect_to 
+      "http://www.last.fm/api/auth/?api_key=#{Key}" 
+    end # END AUTHENTICATE HELPER
+
+    # CALLED BY YOUR CALLBACK URL METHOD TO REGISTER A SESSION
+    def get_lastfm_session(token)
+      signature = get_signature('auth.getsession',{:api_key=>Key,:token=>token}) 
+      if
+        @session = get_lastfm_with_auth('auth.getsession',{ :api_key => Key, :token => token, :signature => signature })
+           session[:lastfm_name] = @session['session']['name']
+           session[:lastfm_key] = @session['session']['key']
+      else 
+        return false
+      end # END IF 
+    end # END GET SESSION
+
+    # PERFORM A REST QUERY WITHOUT AUTHORIZATION
+    def get_lastfm(method,params,type='hash')
+      http = Net::HTTP.new("ws.audioscrobbler.com",80)
+      path = Prefix + method
+      params.each_pair do |key,value|
+        path << "&#{key}=#{value}"
+      end # END EACH
+      resp, data = http.get(url(path))
+      if resp.code == "200"
+        if type == 'hash'
+          hash = Hash.from_xml(data)['lfm']
+          hash.shift
+          return hash
+        else
+          return data
+        end # END IF TYPE
+      else 
+        return resp.body
+      end # END IF RESP 200
+      
+    end # END GET
+
+    # REST GET QUERY FOR AUTH REQUIRED METHODS
+    # NEED TO PASS :sk=>session_key_we_fetched in the params 
+    def get_lastfm_with_auth(method,params,type = 'hash')
+      http = Net::HTTP.new("ws.audioscrobbler.com",80)
+      path = Prefix + method
+      # MAKE QUERY STRING FROM PARAMS
+      params.each_pair do |key,value|
+        path << "&#{key}=#{value}"
+      end # END EACH
+      # APPEND SIGNATURE TO QUERY STRING
+      path << '&api_sig=' + get_signature(method,params)
+      # MAKE THE CALL
+      resp, data = http.get(url(path))
+      # IF SUCCESS RETURN A HASH 
+      if resp.code == "200"
+        if type == 'hash'
+          hash = Hash.from_xml(data)['lfm']
+          hash.shift
+          return hash
+        else 
+          return data
+        end  # END IF TYPE
+      # ELSE RETURN FALSE
+      else 
+        return false
+      end # END IF RESP 200
+    end # END GET WITH AUTH
+
+    # AUTHORIZED POST TO LAST FM - CALL FROM YOUR METHOD THAT HAS RECEIVED THE POSTED FORM
+    def post_lastfm(method,posted)
+      # FIRST WE NEED TO ADD OUR KEY AND SESSION KEY TO THE HASH
+      posted[:api_key] = Key
+      posted[:sk] = session[:lastfm_key]
+      # NOW WE CAN CALL THE GET SIGNATURE METHOD
+      signature =  get_signature(method,posted)
+      # WE CAN APPEND THE SIGNATURE
+      posted[:api_sig] = get_signature(method,posted)
+      # AND FINALLY THE METHOD
+      posted[:method] = 'album.addTags'
+      # DO THE POST
+      resp = Net::HTTP.post_form(URI.parse('http://ws.audioscrobbler.com/2.0/'),posted)
+      # HANDLE THE RESPONSE
+      case resp
+        # SUCCESS
+        when Net::HTTPSuccess, Net::HTTPRedirection
+          return true
+        # FAILURE
+        else
+          return false
+      end # END CASE
+    end # END POST
+
+
+# ---- SPECIFIC METHODS THAT PROVIDE PRE-FORMATTED HASHES ------------ #
 
      # ALBUM INFO - CALLING 1.0 SINCE V2 HAS NO TRACK LISTING
      # TO ADD?

@@ -1,12 +1,18 @@
 LastFm
 ============
+Read Me File contents:
+17 	- Example
+39 	- Methods
+99	- Use Case 
 
-Provides an easy way to query LastFM. 
+Provides some easy ways to interact with the  LastFM API. 
 
-This isn't a comprehensive plugin,
-it just includes the queries that I required for my site.  
+This isn't a completely comprehensive plugin,
+it includes queries that I required for my site, returned as pre-formatted hashes. You could add to or remove from these to suit your needs.
 
-Make sure to put your api key in config/last_fm.yml
+There are also generic methods for a REST GET query (eg artist.topTags), an authorized REST GET query  (eg artist.getTags for a user) and a REST POST query (eg artist.addTags).
+
+* Make sure to put your api key (and secret) in config/last_fm.yml.
 
 Example
 =======
@@ -28,5 +34,107 @@ albums/show.html.erb --
 	<p><%= event['bands] %></p>
 	<p><%= event['date] %></p>
 <% end %>
+
+
+Methods
+=======
+
+1. UNAUTHORIZED REST GET QUERY (eg album.getInfo):
+get_lastfm(method,params)
+
+	Example:
+	@album = get_lastfm('album.getInfo', { :artist => 'Winning', :album=>'This Is An Ad For Cigarettes'})
+	returns a hash: @album['artist], @album['name'], etc.
+
+2. AUTHORIZED REST GET QUERY (eg getTags for by user):
+get_lastfm_with_auth(method,params)
+
+	Example:
+	@tags = get_lastfm_with_auth('album.getTags',{:artist=>'Winning', :album=>'This Is An Ad For Cigarettes',:sk=>session[:lastfm_key]}
+	return a hash: 
+	<% @tags['tags]['tag].each do |tag| %>
+		<%= tag['name] %>
+	<% end %>
+
+3. METHOD #4 - AUTHENTICATION PATH FOR redirects
+authenticate_lastfm
+
+	Use this if lastfm session has not been created for this user. You can think of this method as a route because the method just returns a url for your redirect with your API key appended...
+
+	Example: 
+	if session[:lastfm_key].nil?
+		redirect_to authenticate_lastfm
+	end
+
+4. METHOD #3 - AUTHORIZED REST POST QUERY (eg album.addTags by user)
+post_lastfm(method,parameters)
+
+	Example:
+	def add_tag
+	  if not params[:tags].nil?
+	    values = { :tags => params[:tags], :artist => params[:artist], :album => params[:album] }
+	    @response = post_lastfm('album.addTags',values)
+	  end
+	end
+	
+Also, there are the following specific methods that I created to get nicely pre-formatted hashes. Some of them onlny contain the data that I required, much was left out -- events is a good example. You could add to or remove from these to suit your needs.
+ 
+* lastfm_album_info(artist,album)
+* lastfm_artists_info(artist)
+* lastfm_artists_current_events(artist,limit)
+* lastfm_similar_artists(artist,limit)
+* lastfm_artists_top_albums(artist,limit)
+* lastfm_artists_top_tracks(artist,limit)
+* lastfm_artists_top_tags(artist,limit)
+* lastfm_users_weekly_artists(user,limit)
+* lastfm_users_weekly_albums(user,limit)
+                              
+So you could call:
+@yourhash = lastfm_album_info(artist,album)
+
+Then take a look and see what's there and build a view:
+@yourhash.inspect
+
+
+Use Case
+=======
+1. You have a website that reviews psyche reissues
+
+2. A user named Ralph signs in....
+
+3. Ralph clicks for the 'Monte Dunn' album review
+
+UNAUTHORIZED REST QUERY
+4. In the action to show the review, you do an unauthorized lastfm query - get_lastfm(method,params_hash) - to find similar artists and pop them up as a series of list items with image, band name and a link to the last fm page
+
+AUTHORIZED REST QUERY
+5. Since Ralph has logged in I could also show the tags he has added to that album using an authorized lastfm REST get query - get_lastfm_with_auth(method,params_hash)
+
+6. Ralph wants to add a tag to a record so he clicks on the 'add tag' link which takes him to :controller=>'album' :action=>'add_tag'
+
+7. At this point you would pop up a form for Ralph containing the fields 'album', 'artist' and 'tag', but in order for Ralph to post that form you need to have a lastfm session for him as well.
+
+8. So before you show Ralph the form you do a before filter or just an if statement in the method to check the session vars
+
+9. If that filter fails, you do a redirect using the authenticate_lastfm method
+
+10. Ralph has been redirected and arrives at lastfm, and approves you creating a session, 
+
+11. Ralph gets redirected to your callback url, which might be  :controller=>'albums', :action=>'register_lastfm'
+
+12. Your register_lastfm action calls our get_lastfm_session(token) method using token = params[:token]
+
+13. Since the session was successfully created you redirect Ralph back to the album add tag page.
+
+14. Ralph fills out the form, adding comma separated tags to the tags field. You have pre-filled the album and artist fields for him since you know that it's the Monte Dunn record he's addding tags to. 
+
+14. Now Ralph presses the 'submit' button and posts the form to your 'add_tag' action.
+
+15. Your add_tag action calls our post_lastfm method which handles the post to LastFm.
+
+16. Since the post was successful, you print a 'tag added' message so Ralph knows his tag got added.
+
+17. The next time Ralph goes to LastFM, he'll notice that the tags he added from your site have shown up in LastFM.
+
 
 Copyright (c) 2008 Gordon B. Isnor, released under the MIT license
