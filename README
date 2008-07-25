@@ -40,14 +40,14 @@ Methods
 =======
 
 1. UNAUTHORIZED REST GET QUERY (eg album.getInfo):
-get_lastfm(method,params)
+get_lastfm(method,params,type)
 
 	Example:
 	@album = get_lastfm('album.getInfo', { :artist => 'Winning', :album=>'This Is An Ad For Cigarettes'})
-	returns a hash: @album['artist], @album['name'], etc.
+	returns a hash: @album['artist], @album['name'], etc. Set type to 'xml' xml instead of hash.
 
 2. AUTHORIZED REST GET QUERY (eg getTags for by user):
-get_lastfm_with_auth(method,params)
+get_lastfm_with_auth(method,params,type)
 
 	Example:
 	@tags = get_lastfm_with_auth('album.getTags',{:artist=>'Winning', :album=>'This Is An Ad For Cigarettes',:sk=>session[:lastfm_key]}
@@ -55,6 +55,8 @@ get_lastfm_with_auth(method,params)
 	<% @tags['tags]['tag].each do |tag| %>
 		<%= tag['name] %>
 	<% end %>
+
+Set to type to return xml instead of hash.
 
 3. METHOD #4 - AUTHENTICATION PATH FOR redirects
 authenticate_lastfm
