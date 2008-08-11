@@ -355,7 +355,7 @@ module LastFm
                   "rank" => band.attributes['rank']
                   }
           end # if i
-          i + i + 1
+          i = i + 1
         end
         return bands
       end
