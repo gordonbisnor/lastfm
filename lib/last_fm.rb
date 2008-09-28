@@ -196,10 +196,10 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         artist = {}
-          artist['mbid'] = xml.elements['mbid'] ?  xml.elements['mbid'].text : ''
-          artist['url'] = xml.elements['url'] ? xml.elements['url'].text : ''
-        if not xml.elements['bio'].nil?
-          bio = xml.elements['bio']
+          artist['mbid'] = xml.elements['//mbid'] ?  xml.elements['//mbid'].text : ''
+          artist['url'] = xml.elements['//url'] ? xml.elements['//url'].text : ''
+        if not xml.elements['//bio'].nil?
+          bio = xml.elements['//bio']
             artist['bio_summary'] = bio.elements['summary'] ? bio.elements['summary'].text : ''
             artist['bio_content'] = bio.elements['content'] ? bio.elements['content'].text : ''
         end
