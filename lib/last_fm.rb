@@ -389,6 +389,30 @@ module LastFm
         return albums
       end
     end
+    
+    # USERS TOP ALBUMS
+    def lastfm_users_top_artists(user, period)
+      raise "months must be 'overall', 3, 6, 9, or 12" unless [3, 6, 9, 12, "overall"].include?(period)
+      path = "#{Prefix}user.getTopArtists&user=#{user}&period=#{period}"
+      data = fetch_last_fm(path)
+      if not data == false
+        xml = REXML::Document.new(data)
+        artists = []
+        xml.elements.each('//artist') do |artist|
+          image_hash = {}
+          if artist.elements["image"]
+            [artist.elements["image"]].flatten.each {|i| image_hash[i.attribute("size").value] = i.text}
+          end
+          artists << {
+            "name" => artist.elements["name"].text,
+            "playcount" => artist.elements["playcount"].text,
+            "stremable" => artist.elements["streamable"].text,
+            "images" => image_hash
+          }
+        end
+      end
+      return artists
+    end
  
  end # MODULE INSTANCE METHODS
  
