@@ -90,7 +90,8 @@ Also, there are the following specific methods that I created to get nicely pre-
 * lastfm_artists_top_tags(artist,limit)
 * lastfm_users_weekly_artists(user,limit)
 * lastfm_users_weekly_albums(user,limit)
-                              
+* lastfm_users_top_artists(user, period) -- added by Dan Pickett                             
+
 So you could call:
 @yourhash = lastfm_album_info(artist,album)
 
