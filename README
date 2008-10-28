@@ -3,7 +3,7 @@ LastFm
 Read Me File contents:
 17 	- Example
 39 	- Methods
-99	- Use Case 
+103	- Use Case 
 
 Provides some easy ways to interact with the  LastFM API. 
 
@@ -91,6 +91,7 @@ Also, there are the following specific methods that I created to get nicely pre-
 * lastfm_users_weekly_artists(user,limit)
 * lastfm_users_weekly_albums(user,limit)
 * lastfm_users_top_artists(user, period) -- added by Dan Pickett                             
+* def lastfm_track_get_similar(track,artist,limit=10)
 
 So you could call:
 @yourhash = lastfm_album_info(artist,album)
@@ -138,6 +139,5 @@ AUTHORIZED REST QUERY
 16. Since the post was successful, you print a 'tag added' message so Ralph knows his tag got added.
 
 17. The next time Ralph goes to LastFM, he'll notice that the tags he added from your site have shown up in LastFM.
-
 
 Copyright (c) 2008 Gordon B. Isnor, released under the MIT license

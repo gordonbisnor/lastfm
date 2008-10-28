@@ -406,7 +406,7 @@ module LastFm
           artists << {
             "name" => artist.elements["name"].text,
             "playcount" => artist.elements["playcount"].text,
-            "stremable" => artist.elements["streamable"].text,
+            "streamable" => artist.elements["streamable"].text,
             "images" => image_hash
           }
         end
@@ -414,6 +414,32 @@ module LastFm
       return artists
     end
  
+    # TRACKS
+    def lastfm_track_get_similar(track,artist,limit=10)
+    path = "#{Prefix}track.getsimilar&track=#{track}&artist=#{artist}"
+    data = fetch_last_fm(path)
+    if not data == false
+      xml = REXML::Document.new(data)
+      tracks = []
+      i = 0
+      xml.elements.each('//track') do |track| 
+        if i <= limit
+          if track.elements["image"]
+            image_hash = {}
+            [track.elements["image"]].flatten.each {|image| image_hash[image.attribute("size").value] = image.text}
+          end
+            tracks << { 
+              "name" => track.elements['name'].text,
+              "artist" => track.elements['artist'].elements['name'].text,
+              "url" => track.elements['url'].text,
+              "images" => image_hash
+                    }
+        end
+        i += 1
+      end
+      return tracks
+    end
+    end
+
  end # MODULE INSTANCE METHODS
- 
 end # END MODULE ACTS AS LAST FM
