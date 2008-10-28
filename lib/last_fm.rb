@@ -441,5 +441,22 @@ module LastFm
     end
     end
 
- end # MODULE INSTANCE METHODS
+    def lastfm_track_get_top_tags(track,artist,limit=10)
+      path = "#{Prefix}track.gettoptags&track=#{track}&artist=#{artist}"
+      data = fetch_last_fm(path)
+      if not data == false
+          xml = REXML::Document.new(data)
+          tags = []
+          i = 0
+          xml.elements.each('//tag') do |tag| 
+            if i <= limit
+              tags << tag.elements['name'].text
+            end
+            i += 1
+          end
+          return tags
+        end
+    end
+
+  end # MODULE INSTANCE METHODS
 end # END MODULE ACTS AS LAST FM
