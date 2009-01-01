@@ -172,7 +172,7 @@ module LastFm
          i = 1
          xml.elements.each('//event') do |event| 
            if i <= limit
-             events << event_attributes_for(event,bands)
+             events << event_attributes_for(event)
            end
            i += 1
          end
