@@ -35,14 +35,14 @@ module LastFm
     end
 
     def fetch_last_fm(path)
-          http = Net::HTTP.new("ws.audioscrobbler.com",80)
-          path = url(path)
-          resp, data = http.get(path)
-           if resp.code == "200"
-             return data
-           else
-             return false
-           end	
+      http = Net::HTTP.new("ws.audioscrobbler.com",80)
+      path = url(path)
+      resp, data = http.get(path)
+       if resp.code == "200"
+         return data
+       else
+         return false
+       end
     end
 
     def url(string)
@@ -57,8 +57,8 @@ module LastFm
       signature = get_signature('auth.getsession',{:api_key=>Key,:token=>token}) 
       if
         @session = get_lastfm_with_auth('auth.getsession',{ :api_key => Key, :token => token, :signature => signature })
-           session[:lastfm_name] = @session['session']['name']
-           session[:lastfm_key] = @session['session']['key']
+        session[:lastfm_name] = @session['session']['name']
+        session[:lastfm_key] = @session['session']['key']
       else 
         return false
       end 
@@ -133,10 +133,10 @@ module LastFm
       
         tracks = []
         xml.elements.each('//track') do |el|
-          tracks << { 
-                  "title" => el.attributes["title"],
-                  "url" =>   el.elements['url'] ? el.elements['url'].text : ''
-                  }
+          tracks << {
+            "title" => el.attributes["title"],
+            "url" =>   el.elements['url'] ? el.elements['url'].text : ''
+          }
         end
         album['tracks'] = tracks
       end
@@ -169,14 +169,14 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         events = []
-         i = 1
-         xml.elements.each('//event') do |event| 
-           if i <= limit
-             events << event_attributes_for(event)
-           end
-           i += 1
-         end
-       end
+        i = 1
+        xml.elements.each('//event') do |event| 
+          if i <= limit
+            events << event_attributes_for(event)
+          end
+          i += 1
+        end
+      end
       return events 
     end
 
@@ -194,15 +194,15 @@ module LastFm
       venue = event.elements['venue']
       location = venue.elements['location']
       return { 
-              "title" => event.elements['title'].text, 
-              "url" => event.elements['url'].text,  
-              "date" => event.elements['startDate'].text, 
-              "venue" => venue.elements['name'].text, 
-              "city" => location.elements['city'].text, 
-              "country" => location.elements['country'].text, 
-              "venue_url" => venue.elements['url'].text,
-              "bands" => bands 
-              }
+        "title" => event.elements['title'].text, 
+        "url" => event.elements['url'].text,  
+        "date" => event.elements['startDate'].text, 
+        "venue" => venue.elements['name'].text, 
+        "city" => location.elements['city'].text, 
+        "country" => location.elements['country'].text, 
+        "venue_url" => venue.elements['url'].text,
+        "bands" => bands 
+      }
     end
 
     def lastfm_similar_artists(artist,limit = 7)
@@ -232,10 +232,10 @@ module LastFm
         xml.elements.each('//album') do |album| 
           if i <= limit
             albums <<  { 
-                  "name"=>album.elements['name'].text, 
-                  "url" => album.elements['url'].text, 
-                  "small_image" => album.elements['image'].text 
-                  }
+              "name"=>album.elements['name'].text, 
+              "url" => album.elements['url'].text, 
+              "small_image" => album.elements['image'].text 
+            }
           end
           i = i + 1
         end
@@ -253,9 +253,9 @@ module LastFm
         xml.elements.each('//track') do |track| 
           if i <= limit
             tracks << {
-                  "name"=>track.elements['name'].text,
-                  "url"=>track.elements['url'].text
-                  }
+              "name"=>track.elements['name'].text,
+              "url"=>track.elements['url'].text
+            }
           end 
           i = i + 1
         end
@@ -309,53 +309,54 @@ module LastFm
       end
     end
   
-  private
+    private
 
-  def process_tags_for data, limit
-        if not data == false
-          xml = REXML::Document.new(data)
-          tags = []
-          i = 1
-          xml.elements.each('//tag') do |tag|
-            if i <= limit
-              tags << { 'tag' => tag.elements['name'].text, 'url' => tag.elements['url'].text }              
-            end
-            i = i + 1
+    def process_tags_for data, limit
+      if not data == false
+        xml = REXML::Document.new(data)
+        tags = []
+        i = 1
+        xml.elements.each('//tag') do |tag|
+          if i <= limit
+            tags << { 'tag' => tag.elements['name'].text, 'url' => tag.elements['url'].text }              
           end
-          return tags
+          i = i + 1
         end
-  end
+        return tags
+      end
+    end
 
     def users_weekly_artists_attributes_for band
-       { "name" => band.elements['name'].text, 
-        "url" => band.elements['url'].text,
-        "mbid" => band.elements['mbid'].text,
-        "playcount" => band.elements['playcount'].text,
-        "rank" => band.attributes['rank'] 
-        }
+    {
+      "name" => band.elements['name'].text, 
+      "url" => band.elements['url'].text,
+      "mbid" => band.elements['mbid'].text,
+      "playcount" => band.elements['playcount'].text,
+      "rank" => band.attributes['rank'] 
+    }
     end
 
     def users_weekly_albums_attributes_for album
-       { 
-          "name" => album.elements['name'].text,
-          "band" => album.elements['artist'].text,
-          "url" => album.elements['url'].text,
-          "album_mbid" => album.elements['mbid'].text,
-          "playcount" => album.elements['playcount'].text,
-          "artist_mbid" => album.elements['artist'].attributes['mbid'],
-          "rank" => album.attributes['rank']
-      }
+    { 
+      "name" => album.elements['name'].text,
+      "band" => album.elements['artist'].text,
+      "url" => album.elements['url'].text,
+      "album_mbid" => album.elements['mbid'].text,
+      "playcount" => album.elements['playcount'].text,
+      "artist_mbid" => album.elements['artist'].attributes['mbid'],
+      "rank" => album.attributes['rank']
+    }
     end
 
     def similiar_artists_attributes_for artist
-         {
-            "name" => artist.elements['name'] ? artist.elements['name'].text : '',
-            "url" => artist.elements['url'] ? artist.elements['url'].text :  '' ,
-            "image" => artist.elements['image'] ? artist.elements['image'].text : '',
-            "small_image" => artist.elements['image'] ? artist.elements['image'].text : '',
-            "mbid" => artist.elements['mbid'] ? artist.elements['mbid'].text : '',
-            "match" => artist.elements['match'] ? artist.elements['match'].text : ''
-            }
+    {
+      "name" => artist.elements['name'] ? artist.elements['name'].text : '',
+      "url" => artist.elements['url'] ? artist.elements['url'].text :  '' ,
+      "image" => artist.elements['image'] ? artist.elements['image'].text : '',
+      "small_image" => artist.elements['image'] ? artist.elements['image'].text : '',
+      "mbid" => artist.elements['mbid'] ? artist.elements['mbid'].text : '',
+      "match" => artist.elements['match'] ? artist.elements['match'].text : ''
+    }
     end
  
   end
