@@ -5,7 +5,7 @@ require "uri"
 
 module LastFm
   env = ENV['RAILS_ENV'] || RAILS_ENV
-  config = YAML.load_file(RAILS_ROOT + '/config/last_fm.yml')[env]
+  config = YAML.load_file("#{Rails.root}/config/last_fm.yml")[env]
   Key = config['api_key']
   Secret = config['secret']
   Prefix = "/2.0/?api_key=#{Key}&method="
@@ -46,7 +46,7 @@ module LastFm
     end
 
     def url(string)
-      return  string.gsub(/\ +/, '%20')
+      return string.gsub(/\ +/, '%20')
     end
 
     def authenticate_lastfm
@@ -124,7 +124,7 @@ module LastFm
       path = "/1.0/album/#{artist}/#{album}/info.xml"
       data = fetch_last_fm(path)
       if not data == false
-        xml = REXML::Document.new(data)	
+        xml = REXML::Document.new(data) 
         album = {}
         album['releasedate'] = xml.elements['releasedate'] ? xml.elements['releasedate'].text : ''
         album['url'] = xml.elements['url'] ? xml.elements['url'].text : ''
@@ -149,12 +149,12 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         artist = {}
-          artist['mbid'] = xml.elements['mbid'] ?  xml.elements['mbid'].text : ''
-          artist['url'] = xml.elements['//url'] ? xml.elements['//url'].text : ''
+        artist['mbid'] = xml.elements['mbid'] ?  xml.elements['mbid'].text : ''
+        artist['url'] = xml.elements['//url'] ? xml.elements['//url'].text : ''
         if not xml.elements['//bio'].nil?
           bio = xml.elements['//bio']
-            artist['bio_summary'] = bio.elements['summary'] ? bio.elements['summary'].text : ''
-            artist['bio_content'] = bio.elements['content'] ? bio.elements['content'].text : ''
+          artist['bio_summary'] = bio.elements['summary'] ? bio.elements['summary'].text : ''
+          artist['bio_content'] = bio.elements['content'] ? bio.elements['content'].text : ''
         end
         artist['small_image'] =  xml.elements['//artist'].elements[4].text 
         artist['medium_image'] =  xml.elements['//artist'].elements[5].text 
