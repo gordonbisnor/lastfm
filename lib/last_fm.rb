@@ -16,7 +16,7 @@ module LastFm
 
   module ClassMethods
 
-    def last_fm
+    def self.last_fm
       include LastFm::InstanceMethods
     end    
     
@@ -24,7 +24,7 @@ module LastFm
 
   module InstanceMethods
 
-    def get_signature(method,params)
+    def self.get_signature(method,params)
       signature = []
       signature << 'method' + method
       params.each_pair do |key,value|
@@ -34,7 +34,7 @@ module LastFm
       return Digest::MD5.hexdigest(signature)
     end
 
-    def fetch_last_fm(path)
+    def self.fetch_last_fm(path)
       http = Net::HTTP.new("ws.audioscrobbler.com",80)
       path = url(path)
       resp, data = http.get(path)
@@ -45,15 +45,15 @@ module LastFm
        end
     end
 
-    def url(string)
+    def self.url(string)
       return string.gsub(/\ +/, '%20')
     end
 
-    def authenticate_lastfm
+    def self.authenticate_lastfm
       "http://www.last.fm/api/auth/?api_key=#{Key}" 
     end
 
-    def get_lastfm_session(token)
+    def self.get_lastfm_session(token)
       signature = get_signature('auth.getsession',{:api_key=>Key,:token=>token}) 
       if
         @session = get_lastfm_with_auth('auth.getsession',{ :api_key => Key, :token => token, :signature => signature })
@@ -64,7 +64,7 @@ module LastFm
       end 
     end
 
-    def get_lastfm(method,params,type='hash')
+    def self.get_lastfm(method,params,type='hash')
       http = Net::HTTP.new("ws.audioscrobbler.com",80)
       path = Prefix + method
       params.each_pair do |key,value|
@@ -84,7 +84,7 @@ module LastFm
       end 
     end
 
-    def get_lastfm_with_auth(method,params,type = 'hash')
+    def self.get_lastfm_with_auth(method,params,type = 'hash')
       http = Net::HTTP.new("ws.audioscrobbler.com",80)
       path = Prefix + method
       params.each_pair do |key,value|
@@ -105,7 +105,7 @@ module LastFm
       end
     end
 
-    def post_lastfm(method,posted)
+    def self.post_lastfm(method,posted)
       posted[:api_key] = Key
       posted[:sk] = session[:lastfm_key]
       signature =  get_signature(method,posted)
@@ -120,7 +120,7 @@ module LastFm
       end
     end
 
-    def lastfm_album_info(artist,album)
+    def self.lastfm_album_info(artist,album)
       path = "/1.0/album/#{artist}/#{album}/info.xml"
       data = fetch_last_fm(path)
       if not data == false
@@ -143,7 +143,7 @@ module LastFm
       return album
     end 
 
-    def lastfm_artists_get_info(artist)
+    def self.lastfm_artists_get_info(artist)
       path = "#{Prefix}artist.getinfo&artist=#{artist}"
       data = fetch_last_fm(path)
       if not data == false
@@ -163,7 +163,7 @@ module LastFm
       return artist
     end
 
-    def lastfm_artists_current_events(artist, limit = 10)
+    def self.lastfm_artists_current_events(artist, limit = 10)
       path = "#{Prefix}artist.getevents&artist=#{artist}"
       data = fetch_last_fm(path)
       if not data == false
@@ -180,7 +180,7 @@ module LastFm
       return events 
     end
 
-    def event_bands_for event
+    def self.event_bands_for event
       bands = []
       artists = event.elements['artists']
       artists.elements.each('artist') do |band|
@@ -189,7 +189,7 @@ module LastFm
       return bands
     end
 
-    def event_attributes_for event
+    def self.event_attributes_for event
       bands = event_bands_for event
       venue = event.elements['venue']
       location = venue.elements['location']
@@ -205,7 +205,7 @@ module LastFm
       }
     end
 
-    def lastfm_similar_artists(artist,limit = 7)
+    def self.lastfm_similar_artists(artist,limit = 7)
       path = "#{Prefix}artist.similar&artist=#{artist}&limit=#{limit}"
       data = fetch_last_fm(path)
       if not data == false
@@ -222,7 +222,7 @@ module LastFm
       end
     end
  
-    def lastfm_artists_top_albums(artist,limit = 5)          
+    def self.lastfm_artists_top_albums(artist,limit = 5)          
       path = "#{Prefix}artist.topAlbums&artist=#{artist}"
       data = fetch_last_fm(path)
       if not data == false
@@ -243,7 +243,7 @@ module LastFm
       return albums
     end
 
-    def lastfm_artists_top_tracks(artist, limit = 5)          
+    def self.lastfm_artists_top_tracks(artist, limit = 5)          
       path = "#{Prefix}artist.topTracks&artist=#{artist}"
       data = fetch_last_fm(path)
       if not data == false
@@ -263,19 +263,19 @@ module LastFm
       return tracks
     end
 
-    def lastfm_tracks_top_tags(artist, track, limit = 5)
+    def self.lastfm_tracks_top_tags(artist, track, limit = 5)
       path = "#{Prefix}track.getTopTags&artist=#{artist}&track=#{track}"
       data = fetch_last_fm(path)
       process_tags_for data, limit
     end
 
-    def lastfm_artists_top_tags(artist, limit = 10)
+    def self.lastfm_artists_top_tags(artist, limit = 10)
       path = "#{Prefix}artist.getTopTags&artist=#{artist}"
       data = fetch_last_fm(path)
       process_tags_for data, limit
     end
         
-    def lastfm_users_weekly_artists(user, limit = 10)
+    def self.lastfm_users_weekly_artists(user, limit = 10)
       path = "#{Prefix}user.getWeeklyArtistChart&user=#{user}"
       data = fetch_last_fm(path)
       if not data == false
@@ -292,7 +292,7 @@ module LastFm
       end
     end
 
-    def lastfm_users_weekly_albums(user, limit = 10)
+    def self.lastfm_users_weekly_albums(user, limit = 10)
       path = "#{Prefix}user.getWeeklyAlbumChart&user=#{user}"
       data = fetch_last_fm(path)
       if not data == false
@@ -311,7 +311,7 @@ module LastFm
   
     private
 
-    def process_tags_for data, limit
+    def self.process_tags_for data, limit
       if not data == false
         xml = REXML::Document.new(data)
         tags = []
@@ -326,7 +326,7 @@ module LastFm
       end
     end
 
-    def users_weekly_artists_attributes_for band
+    def self.users_weekly_artists_attributes_for band
     {
       "name" => band.elements['name'].text, 
       "url" => band.elements['url'].text,
@@ -336,7 +336,7 @@ module LastFm
     }
     end
 
-    def users_weekly_albums_attributes_for album
+    def self.users_weekly_albums_attributes_for album
     { 
       "name" => album.elements['name'].text,
       "band" => album.elements['artist'].text,
@@ -348,7 +348,7 @@ module LastFm
     }
     end
 
-    def similiar_artists_attributes_for artist
+    def self.similiar_artists_attributes_for artist
     {
       "name" => artist.elements['name'] ? artist.elements['name'].text : '',
       "url" => artist.elements['url'] ? artist.elements['url'].text :  '' ,
