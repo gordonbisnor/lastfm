@@ -37,12 +37,12 @@ module LastFm
     def self.fetch_last_fm(path)
       http = Net::HTTP.new("ws.audioscrobbler.com",80)
       path = url(path)
-      resp, data = http.get(path)
-       if resp.code == "200"
-         return data
-       else
-         return false
-       end
+      resp = http.get(path)
+      if resp.code == "200"
+        return resp.body
+      else
+        return false
+      end
     end
 
     def self.url(string)
