@@ -149,16 +149,18 @@ module LastFm
       if not data == false
         xml = REXML::Document.new(data)
         artist = {}
-        artist['mbid'] = xml.elements['mbid'] ?  xml.elements['mbid'].text : ''
+        artist['mbid'] = xml.elements['//mbid'] ? xml.elements['//mbid'].text : ''
         artist['url'] = xml.elements['//url'] ? xml.elements['//url'].text : ''
         if not xml.elements['//bio'].nil?
           bio = xml.elements['//bio']
           artist['bio_summary'] = bio.elements['summary'] ? bio.elements['summary'].text : ''
           artist['bio_content'] = bio.elements['content'] ? bio.elements['content'].text : ''
         end
-        artist['small_image'] =  xml.elements['//artist'].elements[4].text 
-        artist['medium_image'] =  xml.elements['//artist'].elements[5].text 
-        artist['large_image'] =  xml.elements['//artist'].elements[6].text 
+        artist['small_image'] =  xml.elements['//artist'].elements[4].text
+        artist['medium_image'] =  xml.elements['//artist'].elements[5].text
+        artist['large_image'] =  xml.elements['//artist'].elements[6].text
+        artist['extralarge_image'] =  xml.elements['//artist'].elements[7].text
+        artist['mega_image'] =  xml.elements['//artist'].elements[8].text
       end
       return artist
     end
