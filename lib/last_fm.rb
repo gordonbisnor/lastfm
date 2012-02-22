@@ -121,16 +121,23 @@ module LastFm
     end
 
     def self.lastfm_album_info(artist,album)
-      path = "/1.0/album/#{artist}/#{album}/info.xml"
+      path = "#{Prefix}album.getinfo&artist=#{artist}&album=#{album}"
       data = fetch_last_fm(path)
       if not data == false
         xml = REXML::Document.new(data) 
         album = {}
-        album['releasedate'] = xml.elements['releasedate'] ? xml.elements['releasedate'].text : ''
-        album['url'] = xml.elements['url'] ? xml.elements['url'].text : ''
-        coverart = xml.elements['//coverart']
-        album['cover'] = coverart.elements['//large'] ? coverart.elements['//large'].text : ''
-      
+        album['name']        = xml.elements['//name'].text
+        album['mbid']        = xml.elements['//mbid'].text
+        album['releasedate'] = xml.elements['//releasedate'].text.match(/[0-9]{4}/)[0] # get the year only
+        album['url']         = xml.elements['//url'].text
+        album['description'] = xml.elements['//wiki'] ? CGI.unescapeHTML(xml.elements['//wiki'].elements['//content'].text) : ''
+
+        album['small_image']      =  xml.elements['//album'].elements[7].text
+        album['medium_image']     =  xml.elements['//album'].elements[8].text
+        album['large_image']      =  xml.elements['//album'].elements[9].text
+        album['extralarge_image'] =  xml.elements['//album'].elements[10].text
+        album['mega_image']       =  xml.elements['//album'].elements[11].text
+
         tracks = []
         xml.elements.each('//track') do |el|
           tracks << {
@@ -154,6 +161,19 @@ module LastFm
         end
       end
       return artists
+    end
+    
+    def self.lastfm_albums_search(keyword)
+      path = "#{Prefix}album.search&album=#{keyword}"
+      data = fetch_last_fm(path)
+      if not data == false
+        xml = REXML::Document.new(data)
+        albums = []
+        xml.elements.each('lfm/results/albummatches/album') do |album|
+          albums << album.elements['name'].text
+        end
+      end
+      return albums
     end
 
     def self.lastfm_artists_get_info(artist)
