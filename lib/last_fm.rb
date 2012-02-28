@@ -181,6 +181,19 @@ module LastFm
       return albums
     end
 
+    def self.search_lastfm_album_songs(mbid)
+      path = "#{Prefix}album.getinfo&mbid=#{mbid}"
+      data = fetch_last_fm(path)
+      if not data == false
+        xml = REXML::Document.new(data)
+        songs = []
+        xml.elements.each('lfm/album/tracks/track') do |track|
+          songs << track.elements['name'].text
+        end
+      end
+      return songs
+    end
+
     def self.lastfm_artists_get_info(artist)
       path = "#{Prefix}artist.getinfo&artist=#{artist}"
       data = fetch_last_fm(path)
