@@ -163,14 +163,19 @@ module LastFm
       return artists
     end
     
-    def self.lastfm_albums_search(keyword)
+    def self.lastfm_albums_search(keyword, with_artist_name = false)
       path = "#{Prefix}album.search&album=#{keyword}"
       data = fetch_last_fm(path)
       if not data == false
         xml = REXML::Document.new(data)
         albums = []
         xml.elements.each('lfm/results/albummatches/album') do |album|
-          albums << album.elements['name'].text
+         album_title = album.elements['name'].text
+          if with_artist_name
+            artist_name = album.elements['artist'].text.to_s
+            album_title += ' - ' + artist_name
+          end
+          albums << album_title
         end
       end
       return albums
